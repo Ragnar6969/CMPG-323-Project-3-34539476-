@@ -8,24 +8,26 @@ using Microsoft.EntityFrameworkCore;
 using DeviceManagement_WebApp.Data;
 using DeviceManagement_WebApp.Models;
 using DeviceManagement_WebApp.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DeviceManagement_WebApp.Controllers
 {
+    [Authorize]
     public class CategoriesController : Controller
     {
         private readonly ConnectedOfficeContext _context;
-        private CategoriesRepository _CategoriesRepository = new CategoriesRepository();
+        private readonly ICategoriesRepository _CategoriesRepository;
 
-        public CategoriesController(ConnectedOfficeContext context)
+        public CategoriesController(ConnectedOfficeContext context, ICategoriesRepository categoriesRepository)
         {
             _context = context;
+            _CategoriesRepository = categoriesRepository;
         }
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            var category = _CategoriesRepository.GetAll();
-            return View(category);
+            return View(_CategoriesRepository.GetAll());
         }
 
         // GET: Categories/Details/5
@@ -36,7 +38,7 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var category = await _CategoriesRepository.GetByID(id);
+            var category = _CategoriesRepository.GetById(id);
             if (category == null)
             {
                 return NotFound();
@@ -50,15 +52,15 @@ namespace DeviceManagement_WebApp.Controllers
         {
             return View();
         }
+
         // POST: Categories/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryId,CategoryName,CategoryDescription,DateCreated")] Category category)
         {
             category.CategoryId = Guid.NewGuid();
-            await _CategoriesRepository.Insert(category);
+            _CategoriesRepository.Add(category);
+            _CategoriesRepository.Save();
             return RedirectToAction(nameof(Index));
         }
 
@@ -70,7 +72,7 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var category = await _CategoriesRepository.Update(id);
+            var category = _CategoriesRepository.GetById(id);
             if (category == null)
             {
                 return NotFound();
@@ -79,8 +81,6 @@ namespace DeviceManagement_WebApp.Controllers
         }
 
         // POST: Categories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("CategoryId,CategoryName,CategoryDescription,DateCreated")] Category category)
@@ -91,7 +91,7 @@ namespace DeviceManagement_WebApp.Controllers
             }
             try
             {
-                await _CategoriesRepository.Update(id, category);
+                _CategoriesRepository.update(category);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -115,7 +115,7 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var category = await _CategoriesRepository.Remove(id);
+            var category = _CategoriesRepository.GetById(id);
             if (category == null)
             {
                 return NotFound();
@@ -129,13 +129,22 @@ namespace DeviceManagement_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var category = await _CategoriesRepository.RemoveConfirmed(id);
+            var category = _CategoriesRepository.GetById(id);
+            _CategoriesRepository.Remove(category);
             return RedirectToAction(nameof(Index));
         }
 
         private bool CategoryExists(Guid id)
         {
-            return _CategoriesRepository.CategoryExists(id);
+            var category = _CategoriesRepository.GetById(id);
+            if(category != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

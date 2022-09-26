@@ -14,9 +14,11 @@ using Microsoft.EntityFrameworkCore;
 using DeviceManagement_WebApp.Data;
 using DeviceManagement_WebApp.Models;
 using DeviceManagement_WebApp.Repository;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DeviceManagement_WebApp.Controllers
 {
+    [Authorize]
     public class DevicesController : Controller
     {
         private readonly ConnectedOfficeContext _context;
