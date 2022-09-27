@@ -1,12 +1,13 @@
 ﻿using DeviceManagement_WebApp.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Threading.Tasks;
 
 namespace DeviceManagement_WebApp.Repository
 {
-    public interface ICategoriesRepository : IGenericRepository<Category>
+    public interface IZonesRepository : IGenericRepository<Zone>
     {
-        Category GetMostRecentCategory();
+        Zone GetMostRecentZone();
         bool Exists(Guid id);
     }
 

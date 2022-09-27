@@ -15,12 +15,10 @@ namespace DeviceManagement_WebApp.Controllers
     [Authorize]
     public class CategoriesController : Controller
     {
-        private readonly ConnectedOfficeContext _context;
         private readonly ICategoriesRepository _CategoriesRepository;
 
-        public CategoriesController(ConnectedOfficeContext context, ICategoriesRepository categoriesRepository)
+        public CategoriesController( ICategoriesRepository categoriesRepository)
         {
-            _context = context;
             _CategoriesRepository = categoriesRepository;
         }
 
@@ -136,15 +134,7 @@ namespace DeviceManagement_WebApp.Controllers
 
         private bool CategoryExists(Guid id)
         {
-            var category = _CategoriesRepository.GetById(id);
-            if(category != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return _CategoriesRepository.Exists(id);
         }
     }
 }

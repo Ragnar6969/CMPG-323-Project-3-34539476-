@@ -7,70 +7,28 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DeviceManagement_WebApp.Data;
 using DeviceManagement_WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
+using DeviceManagement_WebApp.Repository;
 
 namespace DeviceManagement_WebApp.Repository
 {
-    public class ZonesRepository
+    public class ZonesRepository : GenericRepository<Zone>, IZonesRepository
     {
-        private readonly ConnectedOfficeContext _context = new ConnectedOfficeContext();
-
-        // Retrieves all Zones
-        public List<Zone> GetAll()
+        public ZonesRepository(ConnectedOfficeContext context) : base(context)
         {
-            return _context.Zone.ToList();
         }
 
-        // GET: Retrieves zone from specific ID
-        public async Task<Zone> GetByID(Guid? id)
+        // This retrieves the most recent Zone
+        public Zone GetMostRecentZone()
         {
-            var zone = await _context.Zone.FirstOrDefaultAsync(m => m.ZoneId == id);
-            return (zone);
+            return _context.Zone.OrderByDescending(Device => Device.DateCreated).FirstOrDefault();
         }
 
-        // POST: Creates a new zone entry
-        public async Task<Zone> Create([Bind("ZoneId,ZoneName,ZoneDescription,DateCreated")] Zone zone)
+        // this checks if an entry exists
+        public bool Exists(Guid id)
         {
-            _context.Add(zone);
-            await _context.SaveChangesAsync();
-            return (zone);
+            return _context.Device.Any(e => e.DeviceId == id);
         }
 
-        // GET: Edits a zone entry
-        public async Task<Zone> Edit(Guid? id)
-        {
-            var zone = await _context.Zone.FindAsync(id);
-            return (zone);
-        }
-
-        // POST: Edits a zone entry
-        public async Task<Zone> Edit(Guid id, [Bind("ZoneId,ZoneName,ZoneDescription,DateCreated")] Zone zone)
-        {
-            _context.Update(zone);
-            await _context.SaveChangesAsync();
-            return (zone);
-
-        }
-
-        // GET: Deletes a zone entry
-        public async Task<Zone> Delete(Guid? id)
-        {
-            var zone = await _context.Zone.FirstOrDefaultAsync(m => m.ZoneId == id);
-            return (zone);
-        }
-
-        // POST: Confirms that a zone entry was deleted
-        public async Task<Zone> DeleteConfirmed(Guid id)
-        {
-            var zone = await _context.Zone.FindAsync(id);
-            _context.Zone.Remove(zone);
-            await _context.SaveChangesAsync();
-            return (zone);
-        }
-
-        // Checks whether a zone entry exists
-        public bool ZoneExists(Guid id)
-        {
-            return _context.Zone.Any(e => e.ZoneId == id);
-        }
     }
 }

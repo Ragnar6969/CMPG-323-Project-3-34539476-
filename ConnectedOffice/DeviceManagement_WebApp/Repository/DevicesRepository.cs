@@ -1,80 +1,64 @@
-﻿using DeviceManagement_WebApp.Data;
-using DeviceManagement_WebApp.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using DeviceManagement_WebApp.Data;
+using DeviceManagement_WebApp.Models;
+using Microsoft.AspNetCore.Authorization;
+using DeviceManagement_WebApp.Repository;
 
 namespace DeviceManagement_WebApp.Repository
 {
-    public class DevicesRepository
+    public class DevicesRepository : GenericRepository<Device>, IDevicesRepository
     {
-        private readonly ConnectedOfficeContext _context = new ConnectedOfficeContext();
-
-        // Retrieves all devices
-        public List<Device> GetAll()
-        {            
-            return _context.Device.ToList(); ;
-        }
-
-        // GET: Retrieves device from specific ID
-        public async Task<Device> GetByID(Guid? id)
+        public DevicesRepository(ConnectedOfficeContext context) : base(context)
         {
-            var device = await _context.Device.Include(d => d.Category).Include(d => d.Zone).FirstOrDefaultAsync(m => m.DeviceId == id);
-
-            return (device);
         }
 
-        // POST: Creates a new device entry
-        public async Task<Device> Create([Bind("DeviceId,DeviceName,CategoryId,ZoneId,Status,IsActive,DateCreated")] Device device)
+        // This retrieves the most recent device
+        public Device GetMostRecentDevice()
         {
-            _context.Add(device);
-            await _context.SaveChangesAsync();
-            return (device);
+            return _context.Device.OrderByDescending(Device => Device.DateCreated).FirstOrDefault();
         }
 
-        // GET: Edits a device entry
-        public async Task<Device> Edit(Guid? id)
+        //This creates a list for categories
+        public SelectList showCat()
         {
-            var device = await _context.Device.FindAsync(id);
-            return (device);
+            SelectList cat = new SelectList(_context.Category, "CategoryId", "CategoryName");
+            return cat;
         }
 
-        // POST: Edits a device entry
-        public async Task<Device> Edit(Guid id, [Bind("DeviceId,DeviceName,CategoryId,ZoneId,Status,IsActive,DateCreated")] Device device)
+        //This creates a list for zones
+        public SelectList showZone()
         {
-
-            _context.Update(device);
-            await _context.SaveChangesAsync();
-
-            return (device);
-
+            SelectList zone = new SelectList(_context.Zone, "ZoneId", "ZoneName");
+            return zone;
         }
 
-        // GET: Deletes a device entry
-        public async Task<Device> Delete(Guid? id)
+        //This creates a list for categories based on a specific id
+        public SelectList editCat(Guid? id)
         {
-
-            var device = await _context.Device.Include(d => d.Category).Include(d => d.Zone).FirstOrDefaultAsync(m => m.DeviceId == id);
-
-            return (device);
+            var device = this.GetById(id);
+            SelectList cat = new SelectList(_context.Category, "CategoryId", "CategoryName", device.CategoryId);
+            return cat;
         }
 
-        // POST: Confirms that a device entry was deleted
-        public async Task<Device> DeleteConfirmed(Guid id)
+        //This creates a list for zones based on a specific id
+        public SelectList editZone(Guid? id)
         {
-            var device = await _context.Device.FindAsync(id);
-            _context.Device.Remove(device);
-            await _context.SaveChangesAsync();
-            return (device);
+            var device = this.GetById(id);
+            SelectList zone = new SelectList(_context.Zone, "ZoneId", "ZoneName", device.ZoneId);
+            return zone;
         }
 
-        // Checks whether a device entry exists
-        public bool DeviceExists(Guid id)
+        // this checks if an entry exists
+        public bool Exists(Guid id)
         {
             return _context.Device.Any(e => e.DeviceId == id);
         }
+
     }
 }

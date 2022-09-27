@@ -24,5 +24,11 @@ namespace DeviceManagement_WebApp.Repository
         {
             return _context.Category.OrderByDescending(Category => Category.DateCreated).FirstOrDefault();
         }
+
+        // this checks if an entry exists
+        public bool Exists(Guid id)
+        {
+            return _context.Device.Any(e => e.DeviceId == id);
+        }
     }
 }

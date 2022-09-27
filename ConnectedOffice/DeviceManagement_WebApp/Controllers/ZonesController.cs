@@ -15,19 +15,17 @@ namespace DeviceManagement_WebApp.Controllers
     [Authorize]
     public class ZonesController : Controller
     {
-        private readonly ConnectedOfficeContext _context;
-        private ZonesRepository _ZonesRepository = new ZonesRepository();
+        private readonly IZonesRepository _ZonesRepository;
 
-        public ZonesController(ConnectedOfficeContext context)
+        public ZonesController(IZonesRepository zonesRepository)
         {
-            _context = context;
+            _ZonesRepository = zonesRepository;
         }
 
         // GET: Zones
         public async Task<IActionResult> Index()
         {
-            var zone = _ZonesRepository.GetAll();
-            return View(zone);
+            return View(_ZonesRepository.GetAll());
         }
 
         // GET: Zones/Details/5
@@ -38,7 +36,7 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var zone = await _ZonesRepository.GetByID(id);
+            var zone = _ZonesRepository.GetById(id);
             if (zone == null)
             {
                 return NotFound();
@@ -54,14 +52,13 @@ namespace DeviceManagement_WebApp.Controllers
         }
 
         // POST: Zones/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ZoneId,ZoneName,ZoneDescription,DateCreated")] Zone zone)
         {
             zone.ZoneId = Guid.NewGuid();
-            await _ZonesRepository.Create(zone);
+            _ZonesRepository.Add(zone);
+            _ZonesRepository.Save();
 
             return RedirectToAction(nameof(Index));
         }
@@ -74,7 +71,7 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var zone = await _ZonesRepository.Edit(id);
+            var zone = _ZonesRepository.GetById(id);
             if (zone == null)
             {
                 return NotFound();
@@ -83,8 +80,6 @@ namespace DeviceManagement_WebApp.Controllers
         }
 
         // POST: Zones/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("ZoneId,ZoneName,ZoneDescription,DateCreated")] Zone zone)
@@ -96,7 +91,7 @@ namespace DeviceManagement_WebApp.Controllers
 
             try
             {
-                await _ZonesRepository.Edit(id, zone);
+                _ZonesRepository.update(zone);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -121,7 +116,7 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var zone = await _ZonesRepository.Delete(id);
+            var zone = _ZonesRepository.GetById(id);
             if (zone == null)
             {
                 return NotFound();
@@ -135,13 +130,14 @@ namespace DeviceManagement_WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var zone = await _ZonesRepository.DeleteConfirmed(id);
+            var zone = _ZonesRepository.GetById(id);
+            _ZonesRepository.Remove(zone);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ZoneExists(Guid id)
         {
-            return _ZonesRepository.ZoneExists(id);
+            return _ZonesRepository.Exists(id);
         }
     }
 }
