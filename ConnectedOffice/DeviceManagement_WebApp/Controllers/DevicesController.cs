@@ -61,10 +61,7 @@ namespace DeviceManagement_WebApp.Controllers
         {
             device.DeviceId = Guid.NewGuid();
             _DevicesRepository.Add(device);
-            _DevicesRepository.Save();
             return RedirectToAction(nameof(Index));
-
-
         }
 
         // GET: Devices/Edit/5

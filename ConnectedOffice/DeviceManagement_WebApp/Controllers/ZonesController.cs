@@ -58,8 +58,6 @@ namespace DeviceManagement_WebApp.Controllers
         {
             zone.ZoneId = Guid.NewGuid();
             _ZonesRepository.Add(zone);
-            _ZonesRepository.Save();
-
             return RedirectToAction(nameof(Index));
         }
 

@@ -58,7 +58,6 @@ namespace DeviceManagement_WebApp.Controllers
         {
             category.CategoryId = Guid.NewGuid();
             _CategoriesRepository.Add(category);
-            _CategoriesRepository.Save();
             return RedirectToAction(nameof(Index));
         }
 

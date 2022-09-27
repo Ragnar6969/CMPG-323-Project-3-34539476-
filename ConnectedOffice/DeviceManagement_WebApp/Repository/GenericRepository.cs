@@ -19,6 +19,7 @@ namespace DeviceManagement_WebApp.Repository
         public void Add(T entity)
         {
             _context.Set<T>().Add(entity);
+            _context.SaveChanges();
         }
 
         //This adds multiple entities to a specific table in the database
@@ -56,12 +57,6 @@ namespace DeviceManagement_WebApp.Repository
         public void RemoveRange(IEnumerable<T> entities)
         {
             _context.Set<T>().RemoveRange(entities);
-        }
-
-        //This saves the changes to the database
-        public void Save()
-        {
-            _context.SaveChangesAsync();
         }
 
         //This allows you to edit and update an already existing entry in the database
