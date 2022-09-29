@@ -2,7 +2,7 @@
 This repo will cover all the work from project 3.
 
 
-#All files are located in the development branch.
+# All files are located in the development branch.
 
 
 ## How to use the App
